@@ -77,6 +77,9 @@ testpaths = ["tests"]
 # ---------------------------------------------------------------------------
 [tool.importlinter]
 root_package = "dialetiq"
+# Required so the "domain imports no infrastructure" contract can name external
+# packages (sqlalchemy, fastapi, ...) as forbidden.
+include_external_packages = true
 
 # 1. Hexagonal layers. Domain knows nothing. Adapters know everything.
 [[tool.importlinter.contracts]]
@@ -100,10 +103,14 @@ modules = [
     "dialetiq.modules.engagement",
     "dialetiq.modules.commerce",
 ]
-# api.py is the only public surface; ignore imports that go through it.
+# api.py is the only public surface; imports that go through it are allowed.
+# `alerting = "none"` because the wildcard matches nothing until the modules
+# actually import each other -- and an unmatched wildcard is an error, which
+# would fail CI on an empty skeleton.
 ignore_imports = [
     "dialetiq.modules.* -> dialetiq.modules.*.api",
 ]
+unmatched_ignore_imports_alerting = "none"
 
 # 3. platform/ is dumb infrastructure. It must NEVER import a module.
 #    This is the line that stops it from becoming the god-module that a

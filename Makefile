@@ -19,10 +19,11 @@ down:  ## Stop everything
 test:  ## Run the test suite, including the tenant isolation checks
 	cd backend && uv run pytest
 
-lint:  ## Lint, format-check, and verify the architecture contracts
+lint:  ## Lint, format-check, verify architecture contracts and isolation guards
 	cd backend && uv run ruff check .
 	cd backend && uv run ruff format --check .
 	cd backend && uv run lint-imports
+	cd backend && uv run python scripts/check_forbidden_patterns.py
 
 format:  ## Auto-fix formatting and import order
 	cd backend && uv run ruff check --fix .
