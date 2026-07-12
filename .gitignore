@@ -1,0 +1,75 @@
+# ==========================================================================
+# SEGREDOS — nunca commitar.
+# Um segredo que entra no histórico do Git fica lá para sempre, mesmo depois
+# de removido do arquivo. A única remediação é revogar e emitir outro.
+# ==========================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Chaves de assinatura e de push (Apple / Google)
+*.p8
+*.p12
+*.mobileprovision
+*.keystore
+*.jks
+key.properties
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+firebase-service-account*.json
+serviceAccountKey.json
+
+# Credenciais de infraestrutura
+*.tfvars
+!*.tfvars.example
+kubeconfig
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# ==========================================================================
+# Python / backend
+# ==========================================================================
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ==========================================================================
+# Flutter / mobile
+# ==========================================================================
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/build/
+**/ios/Pods/
+**/ios/.symlinks/
+**/android/.gradle/
+**/android/local.properties
+*.iml
+
+# ==========================================================================
+# Sistema operacional e editores
+# ==========================================================================
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# VS Code: versionamos as configurações compartilhadas do projeto,
+# mas não as preferências pessoais de cada um.
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
