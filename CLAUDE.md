@@ -1,10 +1,20 @@
 # Dialetiq
 
 Multi-tenant platform where companies (**tenants**) send promotions to end consumers via a
-single multi-brand mobile app. Consumers browse offers, chat with the store, and register
+single multi-brand mobile app. Consumers browse offers, contact the store, and register
 purchase intent (**leads**).
 
 Read [GLOSSARY.md](GLOSSARY.md) before writing any code. The vocabulary is load-bearing.
+
+## MVP scope
+
+Built solo. Deferred out of the MVP, deliberately: **Kubernetes**
+([ADR 0012](docs/adr/0012-defer-kubernetes.md)), **first-party chat** and **base import**
+([ADR 0013](docs/adr/0013-defer-chat-and-base-import.md)). "Talk to the store" is a
+`wa.me` deep link. Stores onboard consumers through in-app discovery and a QR code.
+
+Nothing in the threat model was cut — the privacy guarantee is a contractual promise to
+tenants who compete with each other.
 
 ## The central guarantee
 
@@ -36,8 +46,8 @@ analytics.
 
 ## Architecture
 
-Modular monolith, hexagonal. One image, several entrypoints (`api`, `ws`,
-`worker-transactional`, `worker-bulk`).
+Modular monolith, hexagonal. One image, several entrypoints (`api`, `worker-transactional`,
+`worker-bulk`). Deployed to a managed container platform; Kubernetes later.
 
 - Group by **feature first, layer second**: `modules/engagement/domain/`, never
   `domain/engagement/`.

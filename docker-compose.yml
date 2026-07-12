@@ -1,0 +1,49 @@
+# Local development. One command from a fresh clone, on any machine.
+#
+# Production uses Neon; this is a plain Postgres so you can work offline and so
+# nobody needs a production credential to develop. Development data is always
+# synthetic -- never a copy of production. Copying production into a dev
+# database is the most common and most avoidable LGPD breach there is.
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: dialetiq
+      POSTGRES_PASSWORD: dialetiq
+      POSTGRES_DB: dialetiq
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dialetiq"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: ./backend
+    command: >
+      uvicorn dialetiq.entrypoints.api:app
+      --host 0.0.0.0 --port 8000 --reload
+    environment:
+      DIALETIQ_ENVIRONMENT: development
+      DIALETIQ_DATABASE_URL: postgresql+psycopg://dialetiq:dialetiq@db:5432/dialetiq
+      DIALETIQ_REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/src:/app/src        # hot reload
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:

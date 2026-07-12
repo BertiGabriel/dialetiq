@@ -49,3 +49,5 @@ future reader needs and the part everyone omits.
 | [0009](0009-domain-vocabulary.md) | Domain vocabulary |
 | [0010](0010-ai-ports-now-agents-later.md) | AI: ports now, agents later |
 | [0011](0011-events-use-tenant-customer-id.md) | Events key on `tenant_customer_id` |
+| [0012](0012-defer-kubernetes.md) | Defer Kubernetes; managed platform first |
+| [0013](0013-defer-chat-and-base-import.md) | Defer first-party chat and base import |

@@ -1,7 +1,7 @@
 # ==========================================================================
-# SEGREDOS — nunca commitar.
-# Um segredo que entra no histórico do Git fica lá para sempre, mesmo depois
-# de removido do arquivo. A única remediação é revogar e emitir outro.
+# SECRETS — never commit.
+# A secret committed to git is in the history forever, even after you delete
+# it. The only remediation is to revoke it and issue a new one.
 # ==========================================================================
 .env
 .env.*
@@ -9,7 +9,7 @@
 *.pem
 *.key
 
-# Chaves de assinatura e de push (Apple / Google)
+# Signing and push keys (Apple / Google)
 *.p8
 *.p12
 *.mobileprovision
@@ -23,7 +23,7 @@ GoogleService-Info.plist
 firebase-service-account*.json
 serviceAccountKey.json
 
-# Credenciais de infraestrutura
+# Infrastructure credentials
 *.tfvars
 !*.tfvars.example
 kubeconfig
@@ -61,15 +61,16 @@ htmlcov/
 *.iml
 
 # ==========================================================================
-# Sistema operacional e editores
+# OS and editors
 # ==========================================================================
 .DS_Store
 Thumbs.db
 .idea/
 *.swp
 
-# VS Code: versionamos as configurações compartilhadas do projeto,
-# mas não as preferências pessoais de cada um.
+# Shared project settings are versioned; personal preferences are not.
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
+
+.claude/settings.local.json

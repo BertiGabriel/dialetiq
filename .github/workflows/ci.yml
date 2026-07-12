@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: dialetiq
+          POSTGRES_PASSWORD: dialetiq
+          POSTGRES_DB: dialetiq
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U dialetiq"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - run: uv sync --frozen
+
+      - name: Lint and format
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      # The architecture, as an executable contract. Without this, hexagonal
+      # is decoration: domain/ starts importing SQLAlchemy, modules start
+      # importing each other's internals, platform/ becomes the god-module,
+      # and nobody notices for six months. See ADR 0002.
+      - name: Architecture contracts
+        run: uv run lint-imports
+
+      # Tenant isolation. The most important suite in the project: it is what
+      # separates real multi-tenancy from multi-tenancy-until-the-first-leak.
+      - name: Tests (incl. tenant isolation)
+        env:
+          DIALETIQ_DATABASE_URL: postgresql+psycopg://dialetiq:dialetiq@localhost:5432/dialetiq
+        run: uv run pytest
+
+  forbidden-patterns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Three ways to silently break tenant isolation, all of which look
+      # harmless in review. See platform/db/session.py for why each one leaks.
+      - name: No connection-leaking session state
+        run: |
+          fail=0
+          if grep -rnE "SET +app\." --include="*.py" backend/src | grep -viE "SET +LOCAL"; then
+            echo "::error::'SET app.*' without LOCAL leaks the GUC across pooled connections."
+            fail=1
+          fi
+          if grep -rn "server_settings" --include="*.py" backend/src; then
+            echo "::error::server_settings binds state to the physical connection, not the transaction."
+            fail=1
+          fi
+          if grep -rn "AUTOCOMMIT" --include="*.py" backend/src; then
+            echo "::error::An AUTOCOMMIT engine evaporates SET LOCAL before the query runs."
+            fail=1
+          fi
+          exit $fail
+
+      # `user` is ambiguous between a store operator and a consumer, and that
+      # ambiguity is exactly how someone writes the wrong JOIN and exposes one
+      # company's customer base to a competitor. See GLOSSARY.md, ADR 0009.
+      - name: Banned identifier `user`
+        run: |
+          if grep -rnE "\b(user|users)\b *[:=]" --include="*.py" backend/src \
+             | grep -viE "staff_user|tenant_customer|person|POSTGRES_USER"; then
+            echo "::error::Use staff_user, person, or tenant_customer. Never a bare 'user'."
+            exit 1
+          fi
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # A secret committed to git is in the history forever. gitleaks is the
+      # second line; .gitignore only protects people who did not use `git add -f`.
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
