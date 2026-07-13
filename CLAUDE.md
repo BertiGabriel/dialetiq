@@ -6,6 +6,10 @@ purchase intent (**leads**).
 
 Read [GLOSSARY.md](GLOSSARY.md) before writing any code. The vocabulary is load-bearing.
 
+[docs/SPECIFICATION.md](docs/SPECIFICATION.md) is the complete, self-contained system
+definition — product, threat model, schema, RLS, conventions, roadmap. It is portable: hand
+it to an engineer or another model with no other context and they can rebuild this correctly.
+
 ## MVP scope
 
 Built solo. Deferred out of the MVP, deliberately: **Kubernetes**
