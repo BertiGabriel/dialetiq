@@ -28,7 +28,7 @@ from __future__ import annotations
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-APP_ROLES = ("app_runtime", "app_tenant", "app_person", "app_delivery")
+APP_ROLES = ("app_runtime", "app_tenant", "app_person", "app_platform", "app_delivery")
 
 # Columns that must never be readable by the tenant-facing role. `person_id` is
 # the cross-tenant join key; the rest are consumer PII. See ADR 0004.
